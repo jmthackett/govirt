@@ -42,6 +42,11 @@ func (p *Node) Connect() error {
 	return nil
 }
 
+func (p *Node) ConnectGetCapabilities() string {
+	retval := C.virConnectGetCapabilities(p.conn.Pointer)
+	return C.GoString(retval)
+}
+
 func (p *Node) Disconnect() int {
 	if p.conn.Pointer != nil {
 		return int(C.virConnectClose(p.conn.Pointer))
