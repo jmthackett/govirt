@@ -47,6 +47,11 @@ func (p *Node) ConnectGetCapabilities() string {
 	return C.GoString(retval)
 }
 
+func (p *Node) NodeGetFreeMemory() uint64 {
+	retval := C.virNodeGetFreeMemory(p.conn.Pointer)
+	return uint64(retval)
+}
+
 func (p *Node) Disconnect() int {
 	if p.conn.Pointer != nil {
 		return int(C.virConnectClose(p.conn.Pointer))
