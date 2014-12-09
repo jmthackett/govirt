@@ -12,6 +12,7 @@ import "errors"
 type Node struct {
 	Url  string
 	conn Connection
+	domain Domain
 }
 
 type Connection struct {
@@ -19,6 +20,7 @@ type Connection struct {
 }
 
 type Domain struct {
+	Pointer C.virDomainPtr
 }
 
 type Network struct {
@@ -33,7 +35,7 @@ type StoragePool struct {
 func (p *Node) Connect() error {
 	cUrl := C.CString(p.Url)
 	defer C.free(unsafe.Pointer(cUrl))
-	conn := C.virConnectOpenAuth(cUrl, C.virConnectAuthPtrDefault, 0) // TODO: Implement alias override
+	conn := C.virConnectOpenAuth(cUrl, C.virConnectAuthPtrDefault, 0) // TODO: Implement alias override // TODO: work out what the previous commenter meant
 	if conn == nil {
 		return errors.New("Unable to establish connection")
 	}
@@ -57,6 +59,15 @@ func (p *Node) Disconnect() int {
 		return int(C.virConnectClose(p.conn.Pointer))
 	}
 	return -1
+}
+
+func (p *Node) DomainDefineXML(xml string) error  {
+	domain := C.virDomainDefineXML(p.conn.Pointer, C.CString(xml))
+	p.domain = Domain{domain}
+	if p.domain.Pointer != nil {
+		return errors.New("Unable to define domain!")
+	}
+	return nil
 }
 
 func Connect(url string) (Node, error) {
